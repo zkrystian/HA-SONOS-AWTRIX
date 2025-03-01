@@ -1,0 +1,22 @@
+alias: Sonos Volume Change to AWTRIX
+description: "Send notification to AWTRIX when volume changes on Sonos. Author: BOOST.PL"
+triggers:
+  - entity_id: media_player.sonos
+    attribute: volume_level
+    trigger: state
+actions:
+  - data:
+      topic: awtrix_2fbd58/notify
+      qos: 0
+      retain: false
+      payload: |-
+        {
+          "text": "{{ new_volume | round(0) }}%",
+          "icon": "{% if new_volume > old_volume %}56218{% else %}56219{% endif %}",
+          "stack": false
+        }
+    action: mqtt.publish
+mode: queued
+variables:
+  old_volume: "{{ trigger.from_state.attributes.volume_level | float(0) * 100 }}"
+  new_volume: "{{ trigger.to_state.attributes.volume_level | float(0) * 100 }}"
